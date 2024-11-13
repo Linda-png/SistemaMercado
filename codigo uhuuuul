@@ -1,0 +1,246 @@
+#include <stdio.h>
+#include <string.h>
+
+// Criação tipo de variável Produto Struct.
+typedef struct {
+    int codigo;
+    char nome[30];
+    float preco;
+} Produto;
+
+// Criação variável vetor do tipo Produto.
+Produto produtos[50];
+
+// Criação tipo de variável Carrinho Struct.
+typedef struct {
+    int codigo;
+    char nome[30];
+    float preco;
+    int qtde;
+} Carrinho;
+
+// Criação variável vetor do tipo Carrinho.
+Carrinho carrinho[50];
+
+// Contador de produtos cadastrados
+int prodCount = 0; 
+// Contador de itens cadastrados no carrinho
+int carCount = 0; 
+
+// Função para cadastrar produtos
+void cadastrarProduto() {
+    int resposta = 1;
+
+    //Laço de repetição que adiciona valores ao vetor produto enquanto o usuário responder que deseja addicionar um produto.
+    while (resposta == 1 && prodCount < 50) {
+        printf("Digite o código do produto: ");
+        scanf("%d", &produtos[prodCount].codigo);
+        printf("Digite o nome do produto: ");
+        scanf("%s", produtos[prodCount].nome);
+        printf("Digite o preço do produto: ");
+        scanf("%f", &produtos[prodCount].preco);
+
+        prodCount++;  // Incrementa o contador de produtos
+
+        //Estrutura de decisão em que os podutos cotinuam sendo adicionados enquanto o tamanho máximo do vetor não for atingido.
+        if (prodCount < 50) {
+            printf("Deseja adicionar mais produtos? Sim=1 Não=2: ");
+            scanf("%d", &resposta);
+        } else {
+            printf("Limite de produtos atingido.\n");
+        }
+    }
+}
+
+// Função para listar os produtos cadastrados
+void listarProdutos() {
+    printf("\nLista de produtos:\n");
+    //Laço que imprime as variaveis presentes no vetor produto do tipo Produto
+    for (int i = 0; i < prodCount; i++) {
+        printf("Código: %d\n", produtos[i].codigo);
+        printf("Nome: %s\n", produtos[i].nome);
+        printf("Preço: %.2f\n\n", produtos[i].preco);
+    }
+}
+
+// Função para verificar se o produto foi adicionado ao carrinho
+int temNoCarrinho(int codigo, int quantidade) {
+    for (int j = 0; j < carCount; j++) {
+        if (carrinho[j].codigo == codigo) {
+            carrinho[j].qtde += quantidade;  
+            return 1; // Produto já está no carrinho
+        }
+    }
+    return 0; // Produto não está no carrinho
+}
+
+//Função para adicionar um produto cadastrado ao carrinho
+void comprarProduto() {
+    int codProd, quantidade;
+    int temProd = 0;
+    int resposta=1;
+
+    //Laço que adiciona produtos ao carrinho enquanto o usuário desejar e a quantidade de itens for menor que 50
+    do{
+    printf("Digite o código do produto que deseja adicionar: ");
+    scanf("%d", &codProd);
+
+    //Verifica se o código do produto já foi cadastrado
+    for (int i = 0; i < prodCount; i++) {
+        if (codProd == produtos[i].codigo) {
+            temProd = 1;
+
+            printf("Digite a quantidade desejada: ");
+            scanf("%d", &quantidade);
+
+            //Verifica se a quantidade é valida
+            if (quantidade <= 0) {
+                printf("Quantidade inválida! Deve ser maior que zero.\n");
+                return;
+            }
+
+            // Adiciona o produto ao carrinho
+            if (!temNoCarrinho(codProd, quantidade)) {
+                
+                carrinho[carCount].codigo = produtos[i].codigo;
+                strncpy(carrinho[carCount].nome, produtos[i].nome, sizeof(carrinho[carCount].nome) - 1);
+                carrinho[carCount].preco = produtos[i].preco;
+                carrinho[carCount].qtde = quantidade;
+                carCount++;  
+            }  
+            break;
+        }
+    }
+
+    //Traz uma resposta ao usuário se o código do produto não for valido
+    if (!temProd) {
+        printf("O produto não pode ser adicionado ao carrinho pois ainda não foi cadastrado.\n");
+    }
+
+    //Verifica a condição da continuação do loop
+    printf("Você deseja adicionar mais produtos ao carrinho? sim-1 não-2 \n");
+    scanf("%d",&resposta);
+    } while (resposta!=2&& carCount<=50);
+}
+
+// Função para listar os produtos adicionados ao carrinho
+void visualizarCarrinho() {
+    printf("\nItens do carrinho:\n");
+    //Laço que imprime as variaveis presentes no vetor carrinho do tipo Carrinho
+    for (int i = 0; i < carCount; i++) {
+        printf("Código: %d\n", carrinho[i].codigo);
+        printf("Nome: %s\n", carrinho[i].nome);
+        printf("Preço: %.2f\n", carrinho[i].preco);
+        printf("Quantidade: %d\n\n", carrinho[i].qtde);
+    }
+}
+
+//Função para imprimir o valor total da compra, imrpimir os itens da compra e esvaziar o carrinho
+void fecharPedido() {
+    float valorTotal = 0.0;
+    //Laço que soma as valores dos itens presentes no vetor carrinho do tipo Carrinho, multiplicando o valor
+    // pelas quantidades equivalentes
+    for (int i = 0; i < carCount; i++) {
+        valorTotal += carrinho[i].preco * carrinho[i].qtde;
+    }
+    //Impressão do total e dos itens
+    printf("O valor total da compra é: %.2f\n", valorTotal);
+    for (int i = 0; i < carCount; i++) {
+        printf("Código: %d\n", carrinho[i].codigo);
+        printf("Nome: %s\n", carrinho[i].nome);
+        printf("Preço: %.2f\n", carrinho[i].preco);
+        printf("Quantidade: %d\n\n", carrinho[i].qtde);
+    }
+
+    //Zera os itens do vetor carrinho
+    carCount = 0;
+    printf("O carrinho foi esvaziado.\n");
+}
+
+//Função que mostra qual o produto equivalente ao codigo digitado
+void pegarProdutoPorCodigo() {
+    int codProd;
+    printf("Digite o código do produto que deseja verificar: ");
+    scanf("%d", &codProd);
+
+    //Verifica se o codigo digitado corresponde ao produto cadastrado
+    for (int i = 0; i < prodCount; i++) {
+        if (codProd == produtos[i].codigo) {
+            printf("Produto encontrado: %s\n", produtos[i].nome);
+            return;
+        }
+    }
+    printf("Produto não encontrado.\n");
+}
+
+//Verifica se um item foi adicionado ao carrinho
+void verificarItemNoCarrinho() {
+    int codProd;
+    printf("Digite o código do produto que deseja verificar no carrinho: ");
+    scanf("%d", &codProd);
+
+    for (int i = 0; i < carCount; i++) {
+        if (carrinho[i].codigo == codProd) {
+            printf("Produto encontrado no carrinho: %s, Quantidade: %d\n", carrinho[i].nome, carrinho[i].qtde);
+            return;
+        }
+    }
+    printf("Produto não encontrado no carrinho.\n");
+}
+
+//Função que mostra as opções de possiveis ações do sistema 
+void menu() {
+    int op;
+
+    do {
+        printf("\nBem-vindo ao Supermercado!\n");
+        printf("O que você deseja realizar?\n");
+        printf("1. Cadastrar produto\n");
+        printf("2. Listar produtos\n");
+        printf("3. Comprar produto\n");
+        printf("4. Visualizar carrinho\n");
+        printf("5. Fechar pedido\n");
+        printf("6. Verificar se o item está no carrinho\n");
+        printf("7. Verificar produto por código \n");
+        printf("8. Sair do sistema\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &op);
+
+        //laço que possibilita a escolha e utilização de alguma função
+        switch (op) {
+            case 1:
+                cadastrarProduto();
+                break;
+            case 2:
+                listarProdutos();
+                break;
+            case 3:
+                comprarProduto();
+                break;
+            case 4:
+                visualizarCarrinho();
+                break;
+            case 5:
+                fecharPedido();
+                break;
+            case 6:
+                verificarItemNoCarrinho();
+                break;
+            case 7:
+                pegarProdutoPorCodigo();
+                break;
+            case 8:
+                printf("Saindo do sistema...\n");
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+                break;
+        }
+    } while (op != 8);
+}
+
+//Função principal responsável por camhar a função menu.
+int main() {
+    menu();
+    return 0;
+}
